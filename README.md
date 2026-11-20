@@ -1,6 +1,6 @@
 # RAW Akai S5K/S6K USB Driver
 
-A Windows 10/11 x64 USB driver package for the **AKAI S5000** sampler (USB `VID_09E8&PID_005E`), used by RAW.
+A Windows 10/11 x64 USB driver package for the **AKAI S5000 / S6000** samplers (USB `VID_09E8&PID_005E`), used by RAW.
 
 It was rebuilt from a reverse-engineered analysis of the original S56Sys driver package. Like the original, it contains no kernel code of its own. It binds Microsoft's inbox **WinUSB** driver to the sampler and sets:
 
@@ -46,4 +46,7 @@ driver/x86/libusbK_x86.dll                  libusbK 3.0.7 x86
 install.ps1 / uninstall.ps1
 ```
 
-Note: only the S5000's USB ID is included. The S6000's USB ID hasn't been confirmed yet.
+## Compatibility
+
+Works with the **AKAI S5000 and S6000**. They share the same USB hardware and USB ID (`VID_09E8&PID_005E`).
+If your sampler isn't recognised, please open an issue on this repository.
