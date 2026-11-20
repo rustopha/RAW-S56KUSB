@@ -1,0 +1,111 @@
+; akai_s5000_rebuilt.inf
+; AKAI S5000 USB driver package, rebuilt from the reverse-engineered S56Sys package (oem51.inf, 2.0.0.0).
+; Binds Microsoft's inbox WinUSB.sys to the S5000. Functionally identical to the original:
+;   same hardware ID, setup class, device interface GUID, WinUSB power settings and libusbK DLLs,
+;   so existing software (RAW, S56Sys, libusb-1.0) finds and uses the sampler exactly as before.
+; Differences: own provider name, package name and version; comments.
+
+[Version]
+Signature                = "$Windows NT$"
+Class                    = %ClassName%
+ClassGuid                = {EB781AAF-9C70-4523-A5DF-642A87ECA567}
+Provider                 = %ProviderName%
+CatalogFile              = akai_s5000_rebuilt.cat
+DriverVer                = 11/20/2026, 2.1.0.0
+DriverPackageDisplayName = %PackageName%
+PnpLockdown              = 1
+
+; ---------- Setup class "AKAI Samplers" (same GUID as the original) ----------
+[ClassInstall32]
+AddReg = AkaiClass_AddReg
+
+[AkaiClass_AddReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-20
+
+; ---------- Device match: AKAI S5000, VID 09E8 PID 005E ----------
+[Manufacturer]
+%ProviderName% = Akai_Devices, NTx86, NTamd64
+
+[Akai_Devices.NTx86]
+%DeviceName% = Akai_Install, USB\VID_09E8&PID_005E
+
+[Akai_Devices.NTamd64]
+%DeviceName% = Akai_Install, USB\VID_09E8&PID_005E
+
+; ---------- Install: WinUSB function driver + libusbK DLLs ----------
+[Akai_Install.NT]
+Include   = winusb.inf
+Needs     = WINUSB.NT
+CopyFiles = Dll_x86_System32
+
+[Akai_Install.NTamd64]
+Include   = winusb.inf
+Needs     = WINUSB.NT
+CopyFiles = Dll_amd64_System32, Dll_x86_SysWOW64
+
+[Akai_Install.NT.HW]
+AddReg = Akai_Device_AddReg
+
+[Akai_Install.NTamd64.HW]
+AddReg = Akai_Device_AddReg
+
+; Device Parameters: interface GUID used by libusb/WinUSB clients, and WinUSB power policy
+; (values identical to the original package)
+[Akai_Device_AddReg]
+HKR,,DeviceInterfaceGUIDs,0x10000,%DeviceInterfaceGUID%
+HKR,,DeviceIdleEnabled,0x00010001,1
+HKR,,DefaultIdleState,0x00010001,0
+HKR,,DefaultIdleTimeout,0x00010001,5000
+HKR,,DeviceIdleIgnoreWakeEnable,0x00010001,0
+HKR,,UserSetDeviceIdleEnabled,0x00010001,0
+HKR,,SystemWakeEnabled,0x00010001,0
+
+[Akai_Install.NT.Services]
+Include    = winusb.inf
+AddService = WinUSB, 0x00000002, WinUSB_Service
+
+[Akai_Install.NTamd64.Services]
+Include    = winusb.inf
+AddService = WinUSB, 0x00000002, WinUSB_Service
+
+[WinUSB_Service]
+DisplayName   = %ServiceName%
+ServiceType   = 1      ; kernel driver
+StartType     = 3      ; demand start
+ErrorControl  = 1
+ServiceBinary = %12%\WinUSB.sys
+
+; ---------- Files ----------
+[SourceDisksNames]
+1 = %DiskName%
+
+[SourceDisksFiles.x86]
+libusbK_x86.dll = 1, x86
+
+[SourceDisksFiles.amd64]
+libusbK.dll     = 1, amd64
+libusbK_x86.dll = 1, x86
+
+[DestinationDirs]
+Dll_amd64_System32 = 10, system32
+Dll_x86_SysWOW64   = 10, syswow64
+Dll_x86_System32   = 10, system32
+
+[Dll_amd64_System32]
+libusbK.dll
+
+[Dll_x86_SysWOW64]
+libusbK.dll, libusbK_x86.dll
+
+[Dll_x86_System32]
+libusbK.dll, libusbK_x86.dll
+
+[Strings]
+ProviderName        = "RAW"
+PackageName         = "RAW Akai S5K/S6K USB Driver"
+DeviceName          = "RAW Akai S5K/S6K USB Driver"
+ClassName           = "AKAI Samplers"
+ServiceName         = "WinUSB - RAW Akai S5K/S6K USB Driver 2.1.0.0"
+DiskName            = "RAW Akai S5K/S6K USB Driver Disk"
+DeviceInterfaceGUID = "{DFCC27D2-EDD0-2E75-3FCC-9BB9E8347723}"
